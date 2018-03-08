@@ -5,7 +5,12 @@ library(RWeka)
 library(hunspell)
 library(pdftools)
 
-setwd("//home//faherrera2//Dropbox//Tesis//corpusPlanes//Abr2015 - Ago2015//ADMINISTRACIÓN DE EMPRESAS")
+# Para cambiar la codificacion de los archivos de texto
+# recode iso-8859-1..UTF-8 *.txt
+
+# Quitar las tildes de los archivos de texto -- sed -i 'y/áéíóú/aeiou/' *.txt 
+
+setwd("//home//faherrera2//Documents//corpusPlanes//Abr2015 - Ago2015//ADMINISTRACIÓN DE EMPRESAS")
 options(mc.cores=1)
 preprocesamientoDatos = function(corpusPlanes){
   # remover enlaces web 
@@ -13,7 +18,7 @@ preprocesamientoDatos = function(corpusPlanes){
   corpusPlanes = tm_map(corpusPlanes, content_transformer(removeURL))
   
   # Remover caracteres especiales
-  removeCarateresEsp = function(x) gsub("[[:cntrl:]]", " ", x)
+  removeCarateresEsp = function(x) gsub("[[:cntrl:]]", "", x)
   corpusPlanes = tm_map(corpusPlanes, content_transformer(removeCarateresEsp))
   
   #espacio a los signos de puntuacion palabra(palabra)
@@ -38,15 +43,16 @@ preprocesamientoDatos = function(corpusPlanes){
   
   #stemming reduce una palabra a su raiz
   corpusPlanes = tm_map(corpusPlanes, stemDocument, language="spanish")
-  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="english")
-  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="french")
-  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="german")
-  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="italian")
-  # remove de espacios dobles
+  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="english")
+  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="french")
+  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="german")
+  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="italian")
+  
+  #remove de espacios dobles
   corpusPlanes = tm_map(corpusPlanes, stripWhitespace)
 }
 
-corpusP1T1 = VCorpus(DirSource("//home//faherrera2//Dropbox//Tesis//corpusPlanes//Abr2015 - Ago2015/ADMINISTRACIÓN DE EMPRESAS", "txt", encoding = "UTF-8"))
+corpusP1T1 = VCorpus(DirSource("//home//faherrera2//Documents//corpusPlanes//Abr2015 - Ago2015/ADMINISTRACIÓN DE EMPRESAS", "txt", encoding = "UTF-8"))
 
 
 corpusPlanes = preprocesamientoDatos(corpusP1T1)
@@ -55,7 +61,6 @@ corpusPlanes = preprocesamientoDatos(corpusP1T1)
 corpusMatriz = corpusPlanes
 tdmUni = TermDocumentMatrix(corpusMatriz)
 tdmUni_matriz = as.matrix(tdmUni)
-
 
 
 tdm <- TermDocumentMatrix(corpusMatriz, control = list(tokenize = BigramTokenizer))
