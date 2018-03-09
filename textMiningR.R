@@ -42,11 +42,11 @@ preprocesamientoDatos = function(corpusPlanes){
   #corpusPlanes = tm_map(corpusPlanes, removeWords, c("i", "ii", "NA", "iii"))
   
   #stemming reduce una palabra a su raiz
-  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="spanish")
-  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="english")
-  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="french")
-  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="german")
-  corpusPlanes = tm_map(corpusPlanes, stemDocument, language="italian")
+  corpusPlanes = tm_map(corpusPlanes, stemDocument, language=c("spanish","english","french","german","italian"))
+  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="english")
+  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="french")
+  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="german")
+  #corpusPlanes = tm_map(corpusPlanes, stemDocument, language="italian")
   
   #remove de espacios dobles
   corpusPlanes = tm_map(corpusPlanes, stripWhitespace)
@@ -66,3 +66,7 @@ tdmUni_matriz = as.matrix(tdmUni)
 tdm <- TermDocumentMatrix(corpusMatriz, control = list(tokenize = BigramTokenizer))
 
 BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+
+inspect(stemDocument(corpusPlanes[[1]], language="spanish"))
+
+inspect(corpusPlanes[[1]])
