@@ -91,9 +91,17 @@ stem_words
 stemCompletion(stem_words, c("complicar", "material"))
 
 esp = dictionary("es_ES")
-words <- c("retroalimentación", "piscina", "veníamos", "escojió")
-correct <- hunspell(corpusPlanes[[1]]$content, format = "text", dict = esp)
-correct = hunspell_parse(unlist(correct), dict = esp)
-correct = hunspell_suggest(unique(unlist(correct)), dict = esp)
-correct = hunspell_check(words, dict = esp)
-#[1]  TRUE  TRUE  TRUE FALSE
+words <- c("retroalimentación", "piscina", "veníamos", "escojió", "cap")
+wordsB = hunspell_find(words, dict = esp)
+wordsC = hunspell_suggest(unlist(wordsB), dict = esp)
+words = c("retro-alimentación", "piscina", "veníamos", "escogió", "cap")
+wordsD = hunspell_stem(words, dict = esp)
+
+#Lista de palabras mal escritas
+bad_words = list()
+for(i in 1:length(corpusPlanes)){
+  bad_words = unlist(c(bad_words, c(unique(unlist(hunspell(corpusPlanes[[i]]$content, format = "text", dict = esp))))))
+}
+
+  
+
