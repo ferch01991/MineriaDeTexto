@@ -3,14 +3,15 @@ library(tm)
 library(SnowballC)
 library(RWeka)
 library(hunspell)
-library(pdftools)
+library(lexRankr)
+library(lsa)
 
 # Para cambiar la codificacion de los archivos de texto
 # file -bi test.txt ---- recode iso-8859-1..UTF-8 *.txt
+# Quitar las tildes de los archivos de texto 
+# sed -i 'y/áéíóú/aeiou/' *.txt 
 
-# Quitar las tildes de los archivos de texto -- sed -i 'y/áéíóú/aeiou/' *.txt 
-
-setwd("//home//faherrera2//Documents//corpusPlanes//Abr2015 - Ago2015//ADMINISTRACIÓN DE EMPRESAS")
+setwd("//home//faherrera2//Documents//corpusPlanes//Abr2015 - Ago2015//ADMINISTRACIÓN EN BANCA Y FINANZAS")
 options(mc.cores=1)
 preprocesamientoDatos = function(corpusPlanes){
   # remover enlaces web 
@@ -56,15 +57,39 @@ preprocesamientoDatos = function(corpusPlanes){
 corpusP1T1 = VCorpus(DirSource("//home//faherrera2//Documents//corpusPlanes//Abr2015 - Ago2015/ADMINISTRACIÓN EN BANCA Y FINANZAS", "txt", encoding = "UTF-8"))
 corpusPlanes = preprocesamientoDatos(corpusP1T1)
 
-#
 
-corpusPlanes = tm_map(corpusPlanes[1], stemDocument, language="spanish")
+# https://github.com/bguvenc/LexRank/blob/master/LexRank.R
+# http://slideplayer.com/slide/8123770/
+# https://adamspannbauer.github.io/2017/12/17/summarizing-web-articles-with-r/
+
+corpusPlanes = tm_map(corpusPlanes, stemDocument, language="spanish")
+corpusLimpio <- corpusPlanes
+
+matrizDTM <- DocumentTermMatrix(corpusLimpio, control = list(tokenize = NGramTokenizer))
+
+matrizTF <- as.matrix(matrizDTM)
+frecuencia <- matrizTF
+frecuencia <- colSums(frecuencia)
+frecuencia <- sort(subset(frecuencia, frecuencia >=8), decreasing = TRUE)
+
+matrizDTM <- DocumentTermMatrix(corpusLimpio, control = list(dictionary = diccionario, tokenize = NGramTokenizer))
+matrizTF <- as.matrix(matrizDTM)
+
+matrizTF-IDF <- DocumentTermMatrix(corpusLimpio, control = list(weighting = weightTfIdf, normalize = TRUE))
+matrizTF-IDF = removeSparseTerms(matrizTF-IDF, 0.95)
+
+
+
+# Matriz de similaridad entre documetos
+similaridadDoc <- cosine(t(matriz))
+
+
+# Frecuencia de palabras
+frecuencia <- matriz
 
 
 #writeCorpus(corpusPlanes, path = "//home//faherrera2//Documents//planesProcesados")
 
-corpusMatriz = corpusPlanes
-tdmUni = TermDocumentMatrix(corpusMatriz)
 tdmUni_matriz = as.matrix(tdmUni)
 
 BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
@@ -102,6 +127,9 @@ bad_words = list()
 for(i in 1:length(corpusPlanes)){
   bad_words = unlist(c(bad_words, c(unique(unlist(hunspell(corpusPlanes[[i]]$content, format = "text", dict = esp))))))
 }
+suggest_words = hunspell_suggest(bad_words, dict = esp)
+correct_words = c("actualmente", "análisis", "análisis", "", "aplicación", "approach", "aprobación", 
+                  "autoevalaución","autoevaluación" ,"retroalimentación", "gerenciales", "eva", "sinópico", "práctico", 
+                  "globalización", "capítulos", "problemas")
 
-  
 
